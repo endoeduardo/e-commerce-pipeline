@@ -1,5 +1,5 @@
 """Crawler for https://www.harpie.com.br using Scrapy framework."""
-from typing import Generator, List, Dict, Union
+from typing import Generator, List, Dict, Union, Any
 import scrapy
 from scrapy.spiders import CrawlSpider
 from scrapy.http import Response
@@ -7,8 +7,9 @@ from scrapy.http import Response
 
 class HarpieCrawler(CrawlSpider):
     """
-    A Scrapy crawler that extracts product information from the e-commerce site https://www.harpie.com.br,
-    including product name, price, installment options, and availability details.
+    A Scrapy crawler that extracts product information from the e-commerce 
+    site https://www.harpie.com.br, including product name, price,
+    installment options, and availability details.
 
     Attributes:
         name (str): The name identifier for the crawler.
@@ -55,15 +56,19 @@ class HarpieCrawler(CrawlSpider):
         links: List[str] = response.xpath(".//ul[@id='nav-root']//a/@href").getall()
         yield from response.follow_all(links, self.parse_page)
 
-    def parse_page(self, response: Response) -> Generator[Union[scrapy.Request, Dict[str, Union[str, List[Dict[str, Union[str, bool]]]]]], None, None]:
+    def parse_page(
+        self,
+        response: Response
+    ) -> Generator[Union[scrapy.Request, Dict[str, Union[str, List[Dict[str, Union[str, bool]]]]]], None, None]: # pylint: disable=line-too-long
         """
         Parses a product listing page to extract links for individual product details.
 
         Args:
-            response (Response): The response object containing the HTML content of a product listing page.
+            response (Response): 
+                The response object containing the HTML content of a product listing page.
 
         Yields:
-            Generator[Union[scrapy.Request, Dict[str, Union[str, List[Dict[str, Union[str, bool]]]]]], None, None]: 
+            Generator[Union[scrapy.Request, Dict[str, Union[str, List[Dict[str, Union[str, bool]]]]]], None, None]: # pylint: disable=line-too-long
             Requests to follow product detail links or extracted product information if available.
         """
         products = response.xpath(".//div[@id='lista-produtos-area']//li")
@@ -76,7 +81,8 @@ class HarpieCrawler(CrawlSpider):
         if next_page is not None:
             yield response.follow(next_page, callback=self.parse_page)
 
-    def parse_item(self, response: Response) -> Dict:
+# pylint: disable=line-too-long
+    def parse_item(self, response: Response) -> Generator[Any, Any, Any]:
         """
         Extracts detailed product information from an individual product page.
 
@@ -84,13 +90,14 @@ class HarpieCrawler(CrawlSpider):
             response (Response): The response object containing the HTML content of a product page.
 
         Returns:
-            Dict[str, Union[str, List[Dict[str, Union[str, bool]]]]]: A dictionary containing product details.
+            Dict[str, Union[str, List[Dict[str, Union[str, bool]]]]]: 
+                A dictionary containing product details.
         """
         product_page = response
 
-        sizes = product_page.xpath(".//span[contains(text(), 'Tamanho')]/following-sibling::div[1]//div[@class='variacao-label']/text()").getall()
-        available = product_page.xpath(".//span[contains(text(), 'Tamanho')]/following-sibling::div[1]//li/@data-estoque").getall()
-        
+        sizes = product_page.xpath(".//span[contains(text(), 'Tamanho')]/following-sibling::div[1]//div[@class='variacao-label']/text()").getall() # pylint: disable=line-too-long
+        available = product_page.xpath(".//span[contains(text(), 'Tamanho')]/following-sibling::div[1]//li/@data-estoque").getall() # pylint: disable=line-too-long
+
         yield {
             "product_name": product_page.xpath(".//h1/text()").get(),
             "product_link": response.request.url,
@@ -104,3 +111,4 @@ class HarpieCrawler(CrawlSpider):
             "rating": product_page.xpath(".//div[@class='rating-area']//strong/text()").get(),
             "number_of_ratings": product_page.xpath(".//div[@class='rating-area']//p/text()").getall()
         }
+# pylint: enable=line-too-long
