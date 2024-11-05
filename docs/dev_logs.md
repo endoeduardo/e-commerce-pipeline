@@ -1,0 +1,1 @@
+File to register some thoughts or findings along the project
