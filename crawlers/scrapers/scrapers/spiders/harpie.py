@@ -43,9 +43,9 @@ class HarpieCrawler(CrawlSpider):
             scrapy.Request: Requests for following product listing links.
         """
         links = response.xpath(".//ul[@id='nav-root']//a/@href").getall()
-        yield from response.follow_all(links, self.parse_item)
+        yield from response.follow_all(links, self.parse_page)
 
-    def parse_item(self, response: Response) -> Generator[dict, None, None]:
+    def parse_page(self, response: Response) -> Generator[dict, None, None]:
         """Parses each product listing page to extract product details.
 
         Args:
@@ -63,3 +63,7 @@ class HarpieCrawler(CrawlSpider):
                 "preco": product.xpath(".//span[@class='small-price']/text()").get(),
                 "qte_parcelamento": product.xpath(".//div[@class='secondary-price flex wrap center justify-center']/text()").get()  # pylint: disable=line-too-long
             }
+
+            next_page = response.xpath(".//li[@class='nav']/a/@href").get()
+            if next_page is not None:
+                yield response.follow(next_page, callback=self.parse_page)
