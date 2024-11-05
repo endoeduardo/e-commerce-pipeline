@@ -14,13 +14,18 @@ class HarpieCrawler(CrawlSpider):
 
         Methods:
             start_requests: Initiates crawling at the homepage.
-            parse_page: Extracts all navigation links and follows them to parse individual items.
-            parse_item: Extracts specific product details from a given page.
+            parse: Extracts all navigation links and follows them to parse individual items.
+            parse_page: Extract links for further product detail.
+            parse_item: Extract product information.
 
         Attributes:
             name (str): Name of the crawler.
             allowed_domains (list): Domains the crawler is allowed to access.
     """
+    def __init__(self, *a, **kw):
+        self.domain = "www.harpie.com.br"
+        super().__init__(*a, **kw)
+
     name = "harpie_crawler"
     allowed_domains = ["www.harpie.com.br"]
 
@@ -52,18 +57,35 @@ class HarpieCrawler(CrawlSpider):
             response (Response): The response object containing product listing HTML content.
 
         Yields:
-            dict: A dictionary with product details, including 'product_name', 'pix', 'preco',
-                  and 'qte_parcelamento'.
+            product detailed page link
         """
         products = response.xpath(".//div[@id='lista-produtos-area']//li")
         for product in products:
-            yield {
-                "product_name": product.xpath(".//h3/text()").get(),
-                "pix": product.xpath(".//span[@class='pix']/text()").get(),
-                "preco": product.xpath(".//span[@class='small-price']/text()").get(),
-                "qte_parcelamento": product.xpath(".//div[@class='secondary-price flex wrap center justify-center']/text()").get()  # pylint: disable=line-too-long
-            }
+            product_link = product.xpath(".//a/@href").get()
+            if product_link:
+                yield response.follow(product_link, callback=self.parse_item)
+            else:
+                pass
 
-            next_page = response.xpath(".//li[@class='nav']/a/@href").get()
-            if next_page is not None:
-                yield response.follow(next_page, callback=self.parse_page)
+        next_page = response.xpath(".//li[@class='nav']/a/@href").get()
+        if next_page is not None:
+            yield response.follow(next_page, callback=self.parse_page)
+    
+    def parse_item(self, response):
+        product_page = response
+
+        sizes = product_page.xpath(".//span[contains(text(), 'Tamanho')]/following-sibling::div[1]//div[@class='variacao-label']/text()").getall()
+        available = product_page.xpath(".//span[contains(text(), 'Tamanho')]/following-sibling::div[1]//li/@data-estoque").getall()
+        
+        yield {
+            "product_name": product_page.xpath(".//h1/text()").get(),
+            "product_description": product_page.xpath(".//div[@class='product-description']/text()").get(),
+            "SKU": product_page.xpath(".//span[@class='codigo-prod']/text()").get(),
+            "one_time_payment": product_page.xpath(".//div[@class='full-price']//span[@class='price-big']/text()").get(),
+            "quantity_of_payments": product_page.xpath(".//div[@class='type-payment']/strong/text()").get(),
+            "payments_value": product_page.xpath(".//div[@class='type-payment']/span/strong/text()").get(),
+            "color": product_page.xpath(".//div[@class='variacao-img-principal']/following-sibling::div[@class='variacao-label']/text()").get(),
+            "variation": [{"size": size, "in_strock": product_available} for size, product_available in zip(sizes, available)],
+            "rating": product_page.xpath(".//div[@class='rating-area']//strong/text()").get(),
+            "number_of_ratings": product_page.xpath( ".//div[@class='rating-area']//p/text()").getall()
+        }
