@@ -3,6 +3,7 @@ from typing import Generator, List, Dict, Union, Any
 import scrapy
 from scrapy.spiders import CrawlSpider
 from scrapy.http import Response
+from scrapers.items import HarpieItem
 
 
 class HarpieCrawler(CrawlSpider):
@@ -93,22 +94,24 @@ class HarpieCrawler(CrawlSpider):
             Dict[str, Union[str, List[Dict[str, Union[str, bool]]]]]: 
                 A dictionary containing product details.
         """
+        item = HarpieItem()
+
         product_page = response
 
         sizes = product_page.xpath(".//span[contains(text(), 'Tamanho')]/following-sibling::div[1]//div[@class='variacao-label']/text()").getall() # pylint: disable=line-too-long
         available = product_page.xpath(".//span[contains(text(), 'Tamanho')]/following-sibling::div[1]//li/@data-estoque").getall() # pylint: disable=line-too-long
 
-        yield {
-            "product_name": product_page.xpath(".//h1/text()").get(),
-            "product_link": response.request.url,
-            "product_description": product_page.xpath(".//div[@class='product-description']/text()").get(),
-            "SKU": product_page.xpath(".//span[@class='codigo-prod']/text()").get(),
-            "one_time_payment": product_page.xpath(".//div[@class='full-price']//span[@class='price-big']/text()").get(),
-            "quantity_of_payments": product_page.xpath(".//div[@class='type-payment']/strong/text()").get(),
-            "payments_value": product_page.xpath(".//div[@class='type-payment']/span/strong/text()").get(),
-            "color": product_page.xpath(".//div[@class='variacao-img-principal']/following-sibling::div[@class='variacao-label']/text()").get(),
-            "variation": [{"size": size, "in_stock": stock == '1'} for size, stock in zip(sizes, available)],
-            "rating": product_page.xpath(".//div[@class='rating-area']//strong/text()").get(),
-            "number_of_ratings": product_page.xpath(".//div[@class='rating-area']//p/text()").getall()
-        }
+        item["product_name"] = product_page.xpath(".//h1/text()").get()
+        item["product_link"] = response.request.url
+        item["product_description"] = product_page.xpath(".//div[@class='product-description']/text()").get()
+        item["SKU"] = product_page.xpath(".//span[@class='codigo-prod']/text()").get()
+        item["one_time_payment"] = product_page.xpath(".//div[@class='full-price']//span[@class='price-big']/text()").get()
+        item["quantity_of_payments"] = product_page.xpath(".//div[@class='type-payment']/strong/text()").get()
+        item["payments_value"] = product_page.xpath(".//div[@class='type-payment']/span/strong/text()").get()
+        item["color"] = product_page.xpath(".//div[@class='variacao-img-principal']/following-sibling::div[@class='variacao-label']/text()").get()
+        item["variation"] = [{"size": size, "in_stock": stock == '1'} for size, stock in zip(sizes, available)]
+        item["rating"] = product_page.xpath(".//div[@class='rating-area']//strong/text()").get()
+        item["number_of_ratings"] = product_page.xpath(".//div[@class='rating-area']//p/text()").getall()
+
+        yield item
 # pylint: enable=line-too-long
