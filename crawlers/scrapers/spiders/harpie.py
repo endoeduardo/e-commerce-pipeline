@@ -1,4 +1,5 @@
 """Crawler for https://www.harpie.com.br using Scrapy framework."""
+# pylint: skip-file: E0401
 from typing import Generator, List, Dict, Union, Any
 import scrapy
 from scrapy.spiders import CrawlSpider

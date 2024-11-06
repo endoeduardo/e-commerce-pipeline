@@ -16,7 +16,7 @@ class HarpiePipeline:
     formatting SKU, price, and quantity fields for standardized storage.
     """
 
-    def process_item(self, item: Any, spider: Any) -> Any:
+    def process_item(self, item: Any, spider: Any) -> Any: # pylint: disable=unused-argument
         """
         Process an item scraped by the spider.
 
@@ -33,20 +33,20 @@ class HarpiePipeline:
             The cleaned item with formatted fields.
         """
         adapter = ItemAdapter(item)
-        
+
         self.clean_fields(adapter)
 
         # Clean SKU field
         sku = adapter.get("SKU")
         if sku:
             adapter["SKU"] = sku.replace("SKU: ", "")
-        
+
         # Convert price fields to float
         for field in ["one_time_payment", "payments_value"]:
             price = adapter.get(field)
             if price:
                 adapter[field] = self._parse_price(price)
-        
+
         # Convert quantity of payments to integer
         quantity = adapter.get("quantity_of_payments")
         if quantity:
@@ -62,7 +62,7 @@ class HarpiePipeline:
             adapter: The item adapter wrapping the item for field access.
         """
         excluded_fields = {"in_stock", "rating", "number_of_ratings", "variation"}
-        
+
         for field in adapter.field_names():
             if field not in excluded_fields:
                 value = adapter.get(field)
