@@ -6,15 +6,70 @@ See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 
 useful for handling different item types with a single interface
 """
+# pylint: skip-file: W0613
+
 from typing import Any
 import logging
+import pymongo
 from itemadapter import ItemAdapter
+from scrapy.crawler import Crawler
+
 
 class HarpiePipeline:
     """
     A pipeline that processes items by cleaning specific fields, 
     formatting SKU, price, and quantity fields for standardized storage.
     """
+    collection_name: str = "harpieCollection"
+
+    def __init__(self, mongo_uri: str, mongo_db: str) -> None:
+        """
+        Initializes the pipeline with the MongoDB URI and database name.
+        
+        Args:
+            mongo_uri (str): URI for MongoDB connection.
+            mongo_db (str): Name of the MongoDB database.
+        """
+        self.mongo_uri = mongo_uri
+        self.mongo_db = mongo_db
+        self.client = None  # This will hold the MongoDB client connection
+        self.db = None
+
+    @classmethod
+    def from_crawler(cls, crawler: Crawler) -> 'HarpiePipeline':
+        """
+        Factory method that initializes the pipeline from Scrapy crawler settings.
+        
+        Args:
+            crawler (Crawler): The Scrapy crawler instance containing settings.
+        
+        Returns:
+            HarpiePipeline: An instance of the HarpiePipeline with settings applied.
+        """
+        return cls(
+            mongo_uri=crawler.settings.get("MONGO_URI"),
+            mongo_db=crawler.settings.get("MONGO_DATABASE", "items"),
+        )
+
+    def open_spider(self, spider) -> None:
+        """
+        Opens the MongoDB connection when the spider is opened.
+        
+        Args:
+            spider: The Scrapy spider instance that is opened.
+        """
+        self.client = pymongo.MongoClient(self.mongo_uri)
+        self.db = self.client[self.mongo_db]
+
+    def close_spider(self, spider) -> None:
+        """
+        Closes the MongoDB connection when the spider is closed.
+        
+        Args:
+            spider: The Scrapy spider instance that is closed.
+        """
+        if self.client:
+            self.client.close()
 
     def process_item(self, item: Any, spider: Any) -> Any: # pylint: disable=unused-argument
         """
@@ -52,6 +107,7 @@ class HarpiePipeline:
         if quantity:
             adapter["quantity_of_payments"] = self._parse_quantity(quantity)
 
+        self.db[self.collection_name].insert_one(ItemAdapter(item).asdict())
         return item
 
     def clean_fields(self, adapter: ItemAdapter) -> None:
