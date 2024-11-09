@@ -35,3 +35,4 @@ class HarpieItem(Item):
     variation = Field()
     rating = Field()
     number_of_ratings = Field()
+    timestamp = Field()

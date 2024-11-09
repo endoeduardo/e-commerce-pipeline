@@ -5,6 +5,7 @@ import scrapy
 from scrapy.spiders import CrawlSpider
 from scrapy.http import Response
 from scrapers.items import HarpieItem
+from datetime import datetime
 
 
 class HarpieCrawler(CrawlSpider):
@@ -113,6 +114,7 @@ class HarpieCrawler(CrawlSpider):
         item["variation"] = [{"size": size, "in_stock": stock == '1'} for size, stock in zip(sizes, available)]
         item["rating"] = product_page.xpath(".//div[@class='rating-area']//strong/text()").get()
         item["number_of_ratings"] = product_page.xpath(".//div[@class='rating-area']//p/text()").getall()
+        item["timestamp"] = datetime.now().strftime(format="%Y-%m-%d %H:%M:%S")
 
         yield item
 # pylint: enable=line-too-long
