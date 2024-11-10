@@ -13,7 +13,7 @@ import logging
 import pymongo
 from itemadapter import ItemAdapter
 from scrapy.crawler import Crawler
-
+from scrapy.exceptions import NotConfigured
 
 class HarpiePipeline:
     """
@@ -46,6 +46,9 @@ class HarpiePipeline:
         Returns:
             HarpiePipeline: An instance of the HarpiePipeline with settings applied.
         """
+        if not crawler.settings.getbool('HARPIE_PIPELINE_ENABLED'):
+            # if this isn't specified in settings, the pipeline will be completely disabled
+            raise NotConfigured
         return cls(
             mongo_uri=crawler.settings.get("MONGO_URI"),
             mongo_db=crawler.settings.get("MONGO_DATABASE", "items"),

@@ -67,6 +67,8 @@ ITEM_PIPELINES = {
    "scrapers.pipelines.HarpiePipeline": 300,
 }
 
+HARPIE_PIPELINE_ENABLED = True
+
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
 #AUTOTHROTTLE_ENABLED = True

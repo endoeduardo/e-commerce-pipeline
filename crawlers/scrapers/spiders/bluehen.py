@@ -28,6 +28,9 @@ class BluhenCrawler(CrawlSpider):
 
     name: str = "bluhen_crawler"
     allowed_domains: List[str] = ["www.bluhen.com.br"]
+    custom_settings = {
+        'HARPIE_PIPELINE_ENABLED': False
+    }
 
     def __init__(self, *args, **kwargs):
         """
