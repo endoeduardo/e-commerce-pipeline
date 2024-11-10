@@ -9,18 +9,19 @@ useful for handling different item types with a single interface
 # pylint: skip-file: W0613
 
 from typing import Any
+import re
 import logging
 import pymongo
 from itemadapter import ItemAdapter
 from scrapy.crawler import Crawler
 from scrapy.exceptions import NotConfigured
 
-class HarpiePipeline:
+class ECommercePipeline:
     """
     A pipeline that processes items by cleaning specific fields, 
     formatting SKU, price, and quantity fields for standardized storage.
     """
-    collection_name: str = "harpieCollection"
+    collection_name: str = "ECommerceCollection"
 
     def __init__(self, mongo_uri: str, mongo_db: str) -> None:
         """
@@ -36,7 +37,7 @@ class HarpiePipeline:
         self.db = None
 
     @classmethod
-    def from_crawler(cls, crawler: Crawler) -> 'HarpiePipeline':
+    def from_crawler(cls, crawler: Crawler) -> 'ECommercePipeline':
         """
         Factory method that initializes the pipeline from Scrapy crawler settings.
         
@@ -44,9 +45,9 @@ class HarpiePipeline:
             crawler (Crawler): The Scrapy crawler instance containing settings.
         
         Returns:
-            HarpiePipeline: An instance of the HarpiePipeline with settings applied.
+            ECommercePipeline: An instance of the ECommercePipeline with settings applied.
         """
-        if not crawler.settings.getbool('HARPIE_PIPELINE_ENABLED'):
+        if not crawler.settings.getbool('E_COMMERCE_PIPELINE'):
             # if this isn't specified in settings, the pipeline will be completely disabled
             raise NotConfigured
         return cls(
@@ -168,3 +169,23 @@ class HarpiePipeline:
             The parsed quantity as an integer.
         """
         return int(quantity.replace("x", ""))
+    
+    def _parse_number_of_ratings(self, number_of_ratings: str) -> int:
+        """
+        Parse a quantinty string by removing non-numeric characters.
+
+        Args:
+            number_of_ratings: The quantings strings to clean.
+        
+        Returns:
+            The parsed quantity as an integer.
+        """
+        try:
+            number_of_ratings = re.findall(r"\d", number_of_ratings)
+            number_of_ratings = "".join(number_of_ratings)
+            number_of_ratings = int(number_of_ratings)
+            return number_of_ratings
+        
+        except TypeError as error:
+            logging.info(f"Invalid number of ratings type, Error: {error}")
+            return None

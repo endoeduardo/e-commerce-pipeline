@@ -28,6 +28,9 @@ class HarpieCrawler(CrawlSpider):
 
     name: str = "harpie_crawler"
     allowed_domains: List[str] = ["www.harpie.com.br"]
+    custom_settings = {
+        "E_COMMERCE_PIPELINE": True
+    }
 
     def __init__(self, *args, **kwargs):
         """

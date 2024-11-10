@@ -29,7 +29,7 @@ class BluhenCrawler(CrawlSpider):
     name: str = "bluhen_crawler"
     allowed_domains: List[str] = ["www.bluhen.com.br"]
     custom_settings = {
-        'HARPIE_PIPELINE_ENABLED': False
+        "E_COMMERCE_PIPELINE": True
     }
 
     def __init__(self, *args, **kwargs):
@@ -106,15 +106,13 @@ class BluhenCrawler(CrawlSpider):
 
         sizes = product_page.xpath(".//span[contains(text(), 'Tamanho')]/following-sibling::div[1]//div[@class='variacao-label']/text()").getall() # pylint: disable=line-too-long
         available = product_page.xpath(".//span[contains(text(), 'Tamanho')]/following-sibling::div[1]//li/@data-estoque").getall() # pylint: disable=line-too-long
-        payments = product_page.xpath(".//div[@class='type-payment']/strong/text()").get()
-        if len(payments) > 1:
-            item["quantity_of_payments"] = payments[0]
-            item["payments_value"] = payments[1]
         item["product_name"] = product_page.xpath(".//h1/text()").get()
         item["product_link"] = response.request.url
-        item["product_description"] = product_page.xpath(".//div[@class='product-description']/text()").get()
-        item["SKU"] = product_page.xpath(".//span[@class='codigo-prod']/text()").get()
+        item["product_description"] = product_page.xpath(".//div[@class='content']/h2/text()").get()
+        item["SKU"] = None
         item["one_time_payment"] = product_page.xpath(".//span[@class='price-big']/text()").get()
+        item["quantity_of_payments"] = product_page.xpath(".//div[@class='type-payment']/strong/text()").get()
+        item["payments_value"] = product_page.xpath(".//div[@class='full-price flex']/span[@class='price-big']/text()").get()
         item["color"] = product_page.xpath(".//div[@class='variacao-img-principal']/following-sibling::div[@class='variacao-label']/text()").get()
         item["variation"] = [{"size": size, "in_stock": stock == '1'} for size, stock in zip(sizes, available)]
         item["rating"] = product_page.xpath(".//a[@class='avaliacoes-link']/span/@data-value").get()

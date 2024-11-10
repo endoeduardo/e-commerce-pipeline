@@ -64,10 +64,10 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   "scrapers.pipelines.HarpiePipeline": 300,
+   "scrapers.pipelines.ECommercePipeline": 300,
 }
 
-HARPIE_PIPELINE_ENABLED = True
+# HARPIE_PIPELINE_ENABLED = True
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
