@@ -16,7 +16,7 @@
             "type": "debugpy",
             "request": "launch",
             "module": "scrapy",
-            "cwd": "${workspaceFolder}/crawlers.scrapers",
+            "cwd": "${workspaceFolder}/crawlers",
             "args": [
                 "runspider",
                 "${file}"
