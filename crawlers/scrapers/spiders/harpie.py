@@ -4,7 +4,7 @@ from typing import Generator, List, Dict, Union, Any
 import scrapy
 from scrapy.spiders import CrawlSpider
 from scrapy.http import Response
-from scrapers.items import HarpieItem
+from scrapers.items import ClothingItem
 from datetime import datetime
 
 
@@ -96,7 +96,7 @@ class HarpieCrawler(CrawlSpider):
             Dict[str, Union[str, List[Dict[str, Union[str, bool]]]]]: 
                 A dictionary containing product details.
         """
-        item = HarpieItem()
+        item = ClothingItem()
 
         product_page = response
 

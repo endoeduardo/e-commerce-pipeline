@@ -5,7 +5,7 @@
 """
 from scrapy import Item, Field
 
-class HarpieItem(Item):
+class ClothingItem(Item):
     """HarpieItem defines the data structure for items scraped from e-commerce websites.
 
     Attributes:
