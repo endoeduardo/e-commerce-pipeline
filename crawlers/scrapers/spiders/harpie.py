@@ -1,11 +1,10 @@
 """Crawler for https://www.harpie.com.br using Scrapy framework."""
-# pylint: skip-file: E0401
 from typing import Generator, List, Dict, Union, Any
+from datetime import datetime
 import scrapy
 from scrapy.spiders import CrawlSpider
 from scrapy.http import Response
 from scrapers.items import ClothingItem
-from datetime import datetime
 
 
 class HarpieCrawler(CrawlSpider):
@@ -37,6 +36,7 @@ class HarpieCrawler(CrawlSpider):
         Initializes the HarpieCrawler with specified arguments and sets the base domain.
         """
         self.domain: str = "www.harpie.com.br"
+        self.site_name = "harpie"
         super().__init__(*args, **kwargs)
 
     def start_requests(self) -> Generator[scrapy.Request, None, None]:
@@ -106,6 +106,7 @@ class HarpieCrawler(CrawlSpider):
         sizes = product_page.xpath(".//span[contains(text(), 'Tamanho')]/following-sibling::div[1]//div[@class='variacao-label']/text()").getall() # pylint: disable=line-too-long
         available = product_page.xpath(".//span[contains(text(), 'Tamanho')]/following-sibling::div[1]//li/@data-estoque").getall() # pylint: disable=line-too-long
 
+        item["site_name"] = self.site_name
         item["product_name"] = product_page.xpath(".//h1/text()").get()
         item["product_link"] = response.request.url
         item["product_description"] = product_page.xpath(".//div[@class='product-description']/text()").get()

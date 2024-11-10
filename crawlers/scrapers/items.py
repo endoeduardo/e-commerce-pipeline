@@ -24,6 +24,7 @@ class ClothingItem(Item):
     This item model is intended for use with Scrapy and helps in organizing 
     the structure of scraped data.
     """
+    site_name = Field()
     product_name = Field()
     product_link = Field()
     product_description = Field()
