@@ -2,7 +2,7 @@
 use e_commerce_db
 
 // creating a collection for harpie data
-db.createCollection("harpieCollection",
+db.createCollection("ECommerceCollection",
 	{
 		validator:{
             "$jsonSchema": {
@@ -61,7 +61,7 @@ db.createCollection("harpieCollection",
 	})
 
 // modifying an existing collection
-db.runCommand( { collMod: "harpieCollection",
+db.runCommand( { collMod: "ECommerceCollection",
     validator:{
         "$jsonSchema": {
             "bsonType": "object",
@@ -120,10 +120,10 @@ db.runCommand( { collMod: "harpieCollection",
 
 
 // delete all objects that does not have timestamp field
-db.harpieCollection.deleteMany({"timestamp": {"$exists": false}})
+db.ECommerceCollection.deleteMany({"timestamp": {"$exists": false}})
 
 // fiding the invalid or valid documets only
-let harpieCollection = {
+let ECommerceCollection = {
     "$jsonSchema": {
         "bsonType": "object",
         "required": [
@@ -177,4 +177,4 @@ let harpieCollection = {
         }
     }
 }
-db.harpieCollection.find({$nor: [harpieCollection]})
+db.ECommerceCollection.find({$nor: [ECommerceCollection]})
