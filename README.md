@@ -21,3 +21,11 @@ The project is divided into the following steps:
 
 ## Key Learnings
 - Building custom web scrapers using Scrapy
+- Storing, managing, and modeling data in MongoDB
+- Developing ETL pipelines with Apache Airflow
+
+## Data Pipeline
+The data pipeline involves scraping e-commerce sites using Scrapy, storing raw and semi-structured data as JSON documents in MongoDB, processing and cleaning the data, and then storing it in a PostgreSQL database. Airflow is used to orchestrate the entire pipeline.
+<br>
+<br>
+![data-pipeline](docs/images/data-pipeline.png)
