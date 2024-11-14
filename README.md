@@ -29,3 +29,22 @@ The data pipeline involves scraping e-commerce sites using Scrapy, storing raw a
 <br>
 <br>
 ![data-pipeline](docs/images/data-pipeline.png)
+
+## Running Scrapy crawlers
+```bash
+cd crawlers/scrapers
+scrapy crawl spider_crawler -O scraped_results.json
+```
+
+## Running Airflow
+Running for the first time airflow
+```bash
+cd airflow
+docker compose up airflow-init
+```
+
+### Cleaning up
+To stop and delete containers, delete volumes with database data and download images, run:
+```bash
+docker compose down --volumes --rmi all
+```
