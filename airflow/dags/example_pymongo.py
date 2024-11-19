@@ -1,6 +1,6 @@
 """Example tutorial for pymongo"""
 import os
-import json
+import logging
 from datetime import datetime
 from random import randint
 from pymongo import MongoClient
@@ -19,18 +19,17 @@ def generate_json_data() -> dict:
 
 def load_json_into_mongo_db() -> None:
     """Load fake data into mongodb"""
-    client = MongoClient(os.environ["MONGO_URI"])
-    db = client[os.environ["MONGO_DATABASE"]]
-    collection = db["test_data"]
+    client = MongoClient("mongodb://admin:adminpassword@localhost:27017")
+    db = client["e_commerce_db"]
 
     json_data = generate_json_data()
 
-    data = json.load(json_data)
-
-    if isinstance(data, list):  # Check if JSON data is a list of documents
-        collection.insert_many(data)
+    if isinstance(json_data, list):  # Check if JSON data is a list of documents
+        db.test_data.insert_many(json_data)
+        logging.info("Inserted documents %s", len(json_data))
     else:  # Otherwise, insert a single document
-        collection.insert_one(data)
+        logging.info("Inserted just one document")
+        db.test_data.insert_one(json_data)
 
 @dag(
     schedule_interval="0 0 * * 2-6",
@@ -45,8 +44,8 @@ def pymongo_tutorial_dag():
     )
 
     load_json_into_mongo_db_task = PythonOperator(
-        task_id="print_current_datetime",
-        python_callable=generate_json_data
+        task_id="load_json_into_mongo_db",
+        python_callable=load_json_into_mongo_db
     )
 
     # pylint: disable=pointless-statement
