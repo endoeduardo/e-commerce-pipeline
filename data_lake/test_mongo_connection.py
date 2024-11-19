@@ -29,7 +29,7 @@ def insert_data():
         "number_of_ratings": []
     }
 
-    db.test.insert_one(product_data)
+    db.test_data.insert_one(product_data)
 
 if __name__ == "__main__":
     insert_data()
