@@ -1,13 +1,13 @@
 """Example tutorial for pymongo"""
-import os
 import logging
 from datetime import datetime
 from random import randint
 from pymongo import MongoClient
+import pendulum
 from airflow.decorators import dag
+# from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
-import pendulum
 
 def generate_json_data() -> dict:
     """Generates a JSON document data"""
@@ -19,17 +19,16 @@ def generate_json_data() -> dict:
 
 def load_json_into_mongo_db() -> None:
     """Load fake data into mongodb"""
-    client = MongoClient("mongodb://admin:adminpassword@localhost:27017")
-    db = client["e_commerce_db"]
-
+    client = MongoClient("mongodb://admin:adminpassword@mongo-test")
+    db = client.e_commerce_db
     json_data = generate_json_data()
 
     if isinstance(json_data, list):  # Check if JSON data is a list of documents
         db.test_data.insert_many(json_data)
         logging.info("Inserted documents %s", len(json_data))
     else:  # Otherwise, insert a single document
-        logging.info("Inserted just one document")
         db.test_data.insert_one(json_data)
+        logging.info("Inserted just one document")
 
 @dag(
     schedule_interval="0 0 * * 2-6",
