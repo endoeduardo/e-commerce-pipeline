@@ -1,9 +1,9 @@
 """Example tutorial dag"""
 from datetime import datetime
+import pendulum
 from airflow.decorators import dag
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
-import pendulum
 
 def print_current_datetime() -> None:
     """Prints current datetime"""
