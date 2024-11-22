@@ -39,8 +39,10 @@ scrapy crawl spider_crawler -O scraped_results.json
 ## Running Airflow
 Running for the first time airflow
 ```bash
+docker network create airflow-network
 cd airflow
 docker compose up airflow-init
+docker compose up
 ```
 
 ### Cleaning up
