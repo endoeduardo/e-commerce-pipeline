@@ -19,7 +19,7 @@ def generate_json_data() -> dict:
 
 def load_json_into_mongo_db() -> None:
     """Load fake data into mongodb"""
-    client = MongoClient("mongodb://admin:adminpassword@mongo-test:27017")
+    client = MongoClient("mongodb://admin:adminpassword@mongo-test")
     db = client.e_commerce_db
     json_data = generate_json_data()
 

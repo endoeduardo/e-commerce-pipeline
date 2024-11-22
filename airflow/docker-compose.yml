@@ -86,6 +86,25 @@ x-airflow-common:
       condition: service_healthy
 
 services:
+  mongodb: 
+    image: mongo
+    container_name: mongo-test
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: adminpassword
+    volumes:
+      -  mongo_data:/data/db
+    # networks:
+    #   - airflow-network
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.stats()"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+
   postgres:
     image: postgres:13
     environment:
@@ -286,3 +305,10 @@ services:
 
 volumes:
   postgres-db-volume:
+  mongo_data:
+    driver: local
+
+networks:
+  default:
+    external: true
+    name: airflow-network
