@@ -1,4 +1,5 @@
 """Example tutorial for pymongo"""
+import os
 import logging
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
@@ -7,9 +8,10 @@ from airflow.decorators import dag
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
 
-TARGET_SCRAPER = "harpie_crawler"
 DAG_START_DATE = pendulum.datetime(2024, 11, 17, tz="UTC")
 DAG_SCHEDULE_INTERVAL = "0 0 * * 2-6"
+SCRAPY_PROJECT_PATH = os.getenv("AIRFLOW_HOME") + "/dags/crawlers"
+SCRAPY_SPIDER_NAME = "harpie_crawler"
 
 def test_mongo_connection(uri: str) -> None:
     """Test mongo connection"""
@@ -21,17 +23,12 @@ def test_mongo_connection(uri: str) -> None:
         logging.error("Connection failed: %s", error)
 
 
-def check_scraper_exists(**kwargs) -> None:
+def check_scraper_exists() -> None:
     """Checks if a given crawler is present in the project, otherwise it will raise an error"""
-    ti = kwargs["ti"]
-    spiders_list = ti.xcom_pull(task_ids='list_spiders')
-    logging.info("Available spiders (%s)", spiders_list)
+    spider_path = os.path.join(SCRAPY_PROJECT_PATH, 'spiders', f'{SCRAPY_SPIDER_NAME}.py')
+    if not os.path.exists(spider_path):
+        raise FileNotFoundError(f"Spider {SCRAPY_SPIDER_NAME} does not exist in the project.")
     
-    if TARGET_SCRAPER not in spiders_list.splitlines():
-        logging.error("Scraper '%s' not found in the project!", TARGET_SCRAPER)
-        raise ValueError
-    logging.info("Scraper '%s' is present.", TARGET_SCRAPER)
-
 
 @dag(
     schedule_interval=DAG_SCHEDULE_INTERVAL,
@@ -49,13 +46,12 @@ def harpie_dag():
 
     list_available_scrapers_task = BashOperator(
         task_id="list_available_scrapers",
-        bash_command="cd dags/crawlers && scrapy list"
+        bash_command=f"cd {SCRAPY_PROJECT_PATH} && scrapy list"
     )
 
     validate_scraper = PythonOperator(
         task_id='validate_scraper',
-        python_callable=check_scraper_exists,
-        provide_context=True,
+        python_callable=check_scraper_exists
     )
 
     # pylint: disable=pointless-statement
