@@ -38,7 +38,7 @@ def check_scraper_exists(**kwargs) -> None:
     start_date=DAG_START_DATE,
     catchup=False
 )
-def pymongo_tutorial_dag():
+def harpie_dag():
     """Main DAG"""
 
     test_mongo_connection_task = PythonOperator(
@@ -61,4 +61,4 @@ def pymongo_tutorial_dag():
     # pylint: disable=pointless-statement
     test_mongo_connection_task >> list_available_scrapers_task >> validate_scraper
 
-dag = pymongo_tutorial_dag() # pylint: disable=invalid-name
+dag = harpie_dag() # pylint: disable=invalid-name
