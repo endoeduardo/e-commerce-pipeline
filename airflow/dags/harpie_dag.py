@@ -10,7 +10,8 @@ from airflow.operators.bash import BashOperator
 
 DAG_START_DATE = pendulum.datetime(2024, 11, 17, tz="UTC")
 DAG_SCHEDULE_INTERVAL = "0 0 * * 2-6"
-SCRAPY_PROJECT_PATH = os.getenv("AIRFLOW_HOME") + "/dags/crawlers"
+# SCRAPY_PROJECT_PATH = os.getenv("AIRFLOW_HOME") + "/dags/crawlers"
+SCRAPY_PROJECT_PATH = "opt/airflow/dags/crawlers"
 SCRAPY_SPIDER_NAME = "harpie_crawler"
 
 def test_mongo_connection(uri: str) -> None:
@@ -28,10 +29,10 @@ def check_scraper_exists() -> None:
     spider_path = os.path.join(SCRAPY_PROJECT_PATH, 'spiders', f'{SCRAPY_SPIDER_NAME}.py')
     if not os.path.exists(spider_path):
         raise FileNotFoundError(f"Spider {SCRAPY_SPIDER_NAME} does not exist in the project.")
-    
+
 
 @dag(
-    schedule_interval=DAG_SCHEDULE_INTERVAL,
+    schedule=DAG_SCHEDULE_INTERVAL,
     start_date=DAG_START_DATE,
     catchup=False
 )
@@ -54,7 +55,15 @@ def harpie_dag():
         python_callable=check_scraper_exists
     )
 
+    run_crawler = BashOperator(
+        task_id="run_crawler",
+        bash_command=f"cd {SCRAPY_PROJECT_PATH} && scrapy crawl {SCRAPY_SPIDER_NAME}"
+    )
+
     # pylint: disable=pointless-statement
-    test_mongo_connection_task >> list_available_scrapers_task >> validate_scraper
+    [test_mongo_connection_task, list_available_scrapers_task >> validate_scraper] >> run_crawler
 
 dag = harpie_dag() # pylint: disable=invalid-name
+
+# if __name__ == "__main__":
+#     dag.test()
