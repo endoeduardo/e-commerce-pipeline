@@ -27,13 +27,13 @@
             "name": "Python: debug dag", // <- name of the session
             "type": "debugpy",
             "request": "launch",
-            "program": "venv/Lib/site-packages/airflow", // <-- path to the airflow installed in your environment (in mine was under miniconda)
+            "program": "${workspaceFolder}/wsl_venv/bin/airflow", // <-- path to the airflow installed in your environment (in mine was under miniconda)
             "console": "integratedTerminal",
             "args": [
                 "tasks", // <-- CLI commands
                 "test", // <-- CLI commands
                 "harpie_dag", // <-- dag_id
-                "airflow", // <-- task_name to be debugged
+                "validate_scraper", // <-- task_name to be debugged
                 "2024-11-22T00:00:00Z" // <-- an execution date
             ],
             "justMyCode": false, // <--- if FALSE the debugger will work even in the code which you didnt wrote, useful if you want to debug the airlfow behavior too

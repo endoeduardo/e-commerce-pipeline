@@ -10,8 +10,8 @@ from airflow.operators.bash import BashOperator
 
 DAG_START_DATE = pendulum.datetime(2024, 11, 17, tz="UTC")
 DAG_SCHEDULE_INTERVAL = "0 0 * * 2-6"
-# SCRAPY_PROJECT_PATH = os.getenv("AIRFLOW_HOME") + "/dags/crawlers"
-SCRAPY_PROJECT_PATH = "opt/airflow/dags/crawlers"
+SCRAPY_PROJECT_PATH = os.getenv("AIRFLOW_HOME") + "/dags/crawlers/scrapers"
+# SCRAPY_PROJECT_PATH = "opt/airflow/dags/crawlers"
 SCRAPY_SPIDER_NAME = "harpie_crawler"
 
 def test_mongo_connection(uri: str) -> None:
@@ -50,7 +50,7 @@ def harpie_dag():
         bash_command=f"cd {SCRAPY_PROJECT_PATH} && scrapy list"
     )
 
-    validate_scraper = PythonOperator(
+    validate_scraper_task = PythonOperator(
         task_id='validate_scraper',
         python_callable=check_scraper_exists
     )
@@ -61,9 +61,9 @@ def harpie_dag():
     )
 
     # pylint: disable=pointless-statement
-    [test_mongo_connection_task, list_available_scrapers_task >> validate_scraper] >> run_crawler
+    [test_mongo_connection_task, list_available_scrapers_task >> validate_scraper_task] >> run_crawler
 
 dag = harpie_dag() # pylint: disable=invalid-name
 
-# if __name__ == "__main__":
-#     dag.test()
+if __name__ == "__main__":
+    dag.test()
